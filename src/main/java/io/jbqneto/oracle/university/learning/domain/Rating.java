@@ -2,12 +2,12 @@ package io.jbqneto.oracle.university.learning.domain;
 
 public enum Rating {
 
-    NOT_RATED(""),
-    ONE_STAR(""),
-    TWO_STARS(""),
-    THREE_STARS(""),
-    FOUR_STARS(""),
-    FIVE_STARS("");
+    NOT_RATED("rating-not-rated"),
+    ONE_STAR("rating-one-star"),
+    TWO_STARS("rating-two-stars"),
+    THREE_STARS("rating-three-stars"),
+    FOUR_STARS("rating-four-stars"),
+    FIVE_STARS("rating-five-stars");
 
     private String stars;
 

@@ -1,37 +1,50 @@
 package io.jbqneto.oracle.university.learning.application;
 
-import io.jbqneto.oracle.university.learning.domain.Food;
 import io.jbqneto.oracle.university.learning.domain.Product;
 import io.jbqneto.oracle.university.learning.domain.ProductManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Comparator;
+import java.util.Locale;
 
-import static io.jbqneto.oracle.university.learning.domain.Rating.*;
+import static io.jbqneto.oracle.university.learning.domain.Rating.THREE_STARS;
+import static io.jbqneto.oracle.university.learning.domain.Rating.TWO_STARS;
 
 public class Application {
     public static void main(String[] args) {
 
-        ProductManager pm = new ProductManager();
+        Locale localeUS = Locale.US;
 
-        Product tea = pm.createProduct(1, "Tea", BigDecimal.valueOf(1.99), NOT_RATED);
-        Product cake = pm.createProduct(2, "Cake", BigDecimal.valueOf(2.50), FOUR_STARS, LocalDate.now());
-        Product coffee = pm.createProduct(3, "Coffee", BigDecimal.valueOf(1.25), NOT_RATED);
-        Product cheese = pm.createProduct(4, "Cheese", BigDecimal.valueOf(3.00), TWO_STARS, LocalDate.now());
+        ProductManager pm = new ProductManager(localeUS);
 
-        Product clone = coffee;
-        Product cheeseCopy = pm.createProduct(4, "Cheese", BigDecimal.valueOf(3.00), TWO_STARS, LocalDate.now());
+        pm.createProduct(1, "Tea", BigDecimal.valueOf(1.99));
+        pm.createProduct(2, "Cake", BigDecimal.valueOf(2.50), LocalDate.now());
 
-        coffee = coffee.applyRating(FIVE_STARS);
+        pm.createProduct(3, "Coffee", BigDecimal.valueOf(1.25));
+        pm.createProduct(4, "Cheese", BigDecimal.valueOf(3.00), LocalDate.now());
 
-        Food betterCake = (Food) cake.applyRating(FIVE_STARS);
+        pm.reviewProduct(3, THREE_STARS, "Nice Coffee");
+        pm.reviewProduct(1, TWO_STARS, "Could be a better tea, but i don like tea anyway.");
 
-        List<Product> productList = List.of(tea, cake, coffee, cheese);
+        System.out.println("\n --> \n");
 
-        System.out.println(productList);
-        System.out.println("is coffee clone equals? (after applyRating) " + clone.equals(coffee));
-        System.out.println("Is cheese Copy equals ? " + cheeseCopy.equals(cheese));
-        System.out.println("Is Cake equals to better cake ? " + betterCake.equals(cake));
+        pm.printProductReport(1);
+        pm.printProductReport(3);
+
+        pm.changeLocale(Locale.UK.toLanguageTag());
+
+        System.out.println("\n --> All prods sorted: \n\t");
+
+        Comparator<Product> ratingSorter = (p1, p2) -> p1.getRating().ordinal() - p2.getRating().ordinal();
+
+        pm.printProductReport(ratingSorter);
+
+        System.out.println("\n --> All prods by price: \n\t");
+        pm.printProductReport(Comparator.comparing(Product::getPrice).reversed());
+
+        System.out.println("\n --> All prods by rating and price: \n\t");
+
+
     }
 }

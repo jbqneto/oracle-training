@@ -28,14 +28,4 @@ public final class Drink extends Product {
         return "Drink" + super.toString();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!super.equals(o))
-            return false;
-
-        if (!getClass().equals(o.getClass()))
-            return false;
-
-        return true;
-    }
 }
