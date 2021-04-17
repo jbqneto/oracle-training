@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static io.jbqneto.oracle.university.learning.domain.Rating.NOT_RATED;
 
@@ -67,13 +69,13 @@ public class ProductManager {
         products.remove(product, reviews);
 
         reviews.add(new Review(rating, comments));
-        int sum = 0;
 
-        for (Review review: reviews) {
-            sum += review.getRating().ordinal();
-        }
+        double avg = reviews.stream()
+                .mapToInt(review -> review.getRating().ordinal())
+                .average()
+                .orElse(0);
 
-        product = product.applyRating( Math.round((float) sum / reviews.size()));
+        product = product.applyRating(Math.round((float) avg));
 
         products.put(product, reviews);
 
@@ -81,37 +83,30 @@ public class ProductManager {
     }
 
     public Product findById(int id) {
-        Product result = null;
-        for (Product product: products.keySet()) {
-            if (product.getId() == id) {
-                result = product;
-                break;
-            }
-        }
-
-        return result;
+        return products.keySet().stream()
+                .filter(product -> product.getId() == id)
+                .findFirst().orElse(null);
     }
 
-    public void printProductReport(int id) {
+    public void printProductsReport(int id) {
         Product product = findById(id);
 
         if (product != null)
-            printProductReport(findById(id));
+            printProductsReport(findById(id));
     }
 
-    private void printProductReport(Product product) {
+    private void printProductsReport(Product product) {
         StringBuilder sb = new StringBuilder();
         List<Review> reviews = products.get(product);
 
         sb.append(formatter.formatProduct(product));
-        sb.append("\n\t");
 
         if (!reviews.isEmpty()) {
             Collections.sort(reviews);
 
-            reviews.forEach((review) -> {
-                sb.append(formatter.formatReview(review));
-            });
+            sb.append(reviews.stream()
+                    .map(r -> formatter.formatReview(r) + "\n")
+                    .collect(Collectors.joining()));
         } else {
             sb.append(formatter.getText("no.reviews"));
         }
@@ -119,25 +114,40 @@ public class ProductManager {
         System.out.println(sb.toString());
     }
 
-    public void printProductReport() {
-        products.keySet().forEach((product) -> printProductReport(product));
+    public Map<String, String> getDiscounts() {
+        return products.keySet().stream()
+                .collect(Collectors.groupingBy(
+                        product -> product.getRating().getStars(),
+                        Collectors.collectingAndThen(
+                                Collectors.summingDouble(prod -> prod.getDiscount().doubleValue()),
+                                discount -> formatter.moneyFormat.format(discount)
+                        )
+                    )
+                );
     }
 
-    public void printProductReport(Comparator<Product> sorter) {
-        List<Product> productList = new ArrayList<>(this.products.keySet());
-        productList.sort(sorter);
-        productList.forEach(this::printProductReport);
+    public void printProductsReport() {
+        products.keySet().forEach((product) -> printProductsReport(product));
+    }
+
+    public void printProductsReport(Predicate<Product> filter, Comparator<Product> sorter) {
+        StringBuilder sb = new StringBuilder();
+
+        products.keySet().stream()
+                .filter(filter)
+                .sorted(sorter)
+                .forEach(p -> sb.append(formatter.formatProduct(p) + "\n"));
+
+        System.out.println(sb);
     }
 
     private static class ResourceFormatter {
 
         private ResourceBundle resources;
-        private Locale locale;
         private DateTimeFormatter dateFormatter;
         private NumberFormat moneyFormat;
 
         private ResourceFormatter(Locale locale) {
-            this.locale = locale;
             this.resources = ResourceBundle.getBundle("resource", locale);
             this.moneyFormat = NumberFormat.getCurrencyInstance(locale);
             this.dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)

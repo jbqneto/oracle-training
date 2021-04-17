@@ -11,6 +11,10 @@ public enum Rating {
 
     private String stars;
 
+    public String getStars() {
+        return this.stars;
+    }
+
     private Rating(String stars) {
         this.stars = stars;
     }

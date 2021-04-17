@@ -27,10 +27,7 @@ public class Application {
         pm.reviewProduct(3, THREE_STARS, "Nice Coffee");
         pm.reviewProduct(1, TWO_STARS, "Could be a better tea, but i don like tea anyway.");
 
-        System.out.println("\n --> \n");
-
-        pm.printProductReport(1);
-        pm.printProductReport(3);
+        pm.printProductsReport();
 
         pm.changeLocale(Locale.UK.toLanguageTag());
 
@@ -38,13 +35,16 @@ public class Application {
 
         Comparator<Product> ratingSorter = (p1, p2) -> p1.getRating().ordinal() - p2.getRating().ordinal();
 
-        pm.printProductReport(ratingSorter);
+        /*
+        pm.printProductsReport(ratingSorter);
 
         System.out.println("\n --> All prods by price: \n\t");
-        pm.printProductReport(Comparator.comparing(Product::getPrice).reversed());
+        pm.printProductsReport(Comparator.comparing(Product::getPrice).reversed());
 
         System.out.println("\n --> All prods by rating and price: \n\t");
+        */
 
+        pm.getDiscounts().forEach((key, value) -> System.out.print(key + " = " + value));
 
     }
 }
